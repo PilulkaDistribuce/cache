@@ -4,22 +4,12 @@ namespace Pilulka\Cache;
 
 use Closure;
 
-class FileCache implements Repository
+class ArrayCache implements Repository
 {
 
     private $isChanged = false;
     protected $filePath;
-    private $data;
-
-    /**
-     * FileCache constructor.
-     * @param $filePath
-     */
-    public function __construct($filePath)
-    {
-        $this->filePath = $filePath;
-        $this->loadData();
-    }
+    private $data = [];
 
     public function has($key)
     {
@@ -83,27 +73,6 @@ class FileCache implements Repository
         $this->unsetKey($key);
     }
 
-    public function __destruct()
-    {
-        $this->save();
-    }
-
-    private function save()
-    {
-        if ($this->isChanged) {
-            file_put_contents($this->filePath, serialize($this->data), LOCK_EX);
-        }
-    }
-
-    private function loadData()
-    {
-        if (file_exists($this->filePath)) {
-            $this->data = (array)unserialize(file_get_contents($this->filePath));
-        } else {
-            $this->data = [];
-        }
-    }
-
     private function getKey($key)
     {
         $value = (isset($this->data[$key])) ? $this->data[$key] : null;
@@ -112,7 +81,6 @@ class FileCache implements Repository
         }
         return null;
     }
-
 
     private function setKey($key, $data, $ttl)
     {
